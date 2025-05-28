@@ -26,5 +26,16 @@
     
     ?>
 
+
+   <?php
+   $people = array(
+   'Fenil',
+   'Dhruv',
+   'Priyank');
+    $person['first'] = 'Mahak';
+    $person['last'] = 'Rutul';
+    ?>
+
+
 </body>
 </html>
