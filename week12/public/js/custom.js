@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Add loading animation to buttons
+    // Include a loading animation on buttons
     const buttons = document.querySelectorAll('.primary-btn, .nav-btn, .btn-view, .btn-edit, .btn-delete');
     buttons.forEach(button => {
         button.addEventListener('click', function(e) {

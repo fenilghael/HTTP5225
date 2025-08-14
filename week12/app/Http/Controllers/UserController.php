@@ -3,98 +3,110 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Course;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        try {
-            $learners = User::all();
-            return view('users.index', compact('learners'));
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to load learner data: ' . $e->getMessage());
-        }
+        $users = User::with('courses')->get();
+        return view('users.index', compact('users'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        return view('users.create');
+        $courses = Course::all();
+        return view('users.create', compact('courses'));
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users',
-                'password' => 'required|string|min:6'
-            ]);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'courses' => 'array'
+        ]);
 
-            User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password)
-            ]);
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+        ]);
 
-            return redirect()->route('learners.index')->with('success', 'Learner registration completed successfully.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back()->withErrors($e->validator)->withInput();
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Registration failed: ' . $e->getMessage())->withInput();
+        if ($request->has('courses')) {
+            $user->courses()->attach($request->courses);
         }
+
+        return redirect()->route('users.index')->with('success', 'Student created successfully!');
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(User $user)
     {
-        try {
-            return view('users.show', compact('user'));
-        } catch (\Exception $e) {
-            return redirect()->route('learners.index')->with('error', 'Unable to load learner profile.');
-        }
+        $user->load('courses');
+        return view('users.show', compact('user'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        $courses = Course::all();
+        $user->load('courses');
+        return view('users.edit', compact('user', 'courses'));
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, User $user)
     {
-        try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email,' . $user->id,
-                'password' => 'nullable|string|min:6'
-            ]);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:6',
+            'courses' => 'array'
+        ]);
 
-            $updateData = [
-                'name' => $request->name,
-                'email' => $request->email,
-            ];
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
 
-            if ($request->password) {
-                $updateData['password'] = Hash::make($request->password);
-            }
-
-            $user->update($updateData);
-
-            return redirect()->route('learners.index')->with('success', 'Learner information updated successfully.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back()->withErrors($e->validator)->withInput();
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Update operation failed: ' . $e->getMessage())->withInput();
+        if ($request->filled('password')) {
+            $user->update(['password' => bcrypt($request->password)]);
         }
+
+        if ($request->has('courses')) {
+            $user->courses()->sync($request->courses);
+        } else {
+            $user->courses()->detach();
+        }
+
+        return redirect()->route('users.index')->with('success', 'Student updated successfully!');
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(User $user)
     {
-        try {
-            $user->delete();
-            return redirect()->route('learners.index')->with('success', 'Learner record removed successfully.');
-        } catch (\Exception $e) {
-            return redirect()->route('learners.index')->with('error', 'Deletion failed: ' . $e->getMessage());
-        }
+        $user->courses()->detach();
+        $user->delete();
+        return redirect()->route('users.index')->with('success', 'Student deleted successfully!');
     }
 } 

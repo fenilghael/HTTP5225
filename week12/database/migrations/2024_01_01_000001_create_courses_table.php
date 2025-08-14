@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description');
+            $table->unsignedBigInteger('professor_id')->nullable();
             $table->timestamps();
+
+            $table->foreign('professor_id')->references('id')->on('professors')->onDelete('set null');
         });
     }
 

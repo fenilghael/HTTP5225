@@ -3,88 +3,86 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Professor;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        try {
-            $programs = Course::all();
-            return view('courses.index', compact('programs'));
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to load program data: ' . $e->getMessage());
-        }
+        $courses = Course::with(['professor', 'students'])->get();
+        return view('courses.index', compact('courses'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        return view('courses.create');
+        $professors = Professor::all();
+        return view('courses.create', compact('professors'));
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'required|string'
-            ]);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'professor_id' => 'nullable|exists:professors,id'
+        ]);
 
-            Course::create([
-                'name' => $request->name,
-                'description' => $request->description
-            ]);
+        Course::create($request->all());
 
-            return redirect()->route('programs.index')->with('success', 'Educational program created successfully.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back()->withErrors($e->validator)->withInput();
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Program creation failed: ' . $e->getMessage())->withInput();
-        }
+        return redirect()->route('courses.index')->with('success', 'Course created successfully!');
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(Course $course)
     {
-        try {
-            return view('courses.show', compact('course'));
-        } catch (\Exception $e) {
-            return redirect()->route('programs.index')->with('error', 'Unable to load program details.');
-        }
+        $course->load(['professor', 'students']);
+        return view('courses.show', compact('course'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit(Course $course)
     {
-        return view('courses.edit', compact('course'));
+        $professors = Professor::all();
+        return view('courses.edit', compact('course', 'professors'));
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, Course $course)
     {
-        try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'required|string'
-            ]);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'professor_id' => 'nullable|exists:professors,id'
+        ]);
 
-            $course->update([
-                'name' => $request->name,
-                'description' => $request->description
-            ]);
+        $course->update($request->all());
 
-            return redirect()->route('programs.index')->with('success', 'Program information updated successfully.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back()->withErrors($e->validator)->withInput();
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Program update failed: ' . $e->getMessage())->withInput();
-        }
+        return redirect()->route('courses.index')->with('success', 'Course updated successfully!');
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(Course $course)
     {
-        try {
-            $course->delete();
-            return redirect()->route('programs.index')->with('success', 'Program removed successfully.');
-        } catch (\Exception $e) {
-            return redirect()->route('programs.index')->with('error', 'Program deletion failed: ' . $e->getMessage());
-        }
+        $course->students()->detach();
+        $course->delete();
+        return redirect()->route('courses.index')->with('success', 'Course deleted successfully!');
     }
 }

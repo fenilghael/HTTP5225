@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modify Learner Information</title>
+    <title>Modify Student Information</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
@@ -13,11 +13,11 @@
         <div class="form-card">
             <div class="form-header">
                 <h3 class="mb-0">
-                    <i class="fas fa-edit"></i> Modify Learner Information
+                    <i class="fas fa-edit"></i> Modify Student Information
                 </h3>
             </div>
             <div class="form-body">
-                <form method="POST" action="{{ route('learners.update', $user->id) }}">
+                <form method="POST" action="{{ route('users.update', $user->id) }}">
                     @csrf
                     @method('PUT')
                     
@@ -63,11 +63,32 @@
                         @enderror
                     </div>
 
+                    <div class="form-group">
+                        <label for="courses" class="form-label">
+                            <i class="fas fa-graduation-cap"></i> Select Courses
+                        </label>
+                        <select class="form-select @error('courses') is-invalid @enderror" 
+                                id="courses" name="courses[]" multiple>
+                            @foreach($courses as $course)
+                                <option value="{{ $course->id }}" 
+                                    {{ in_array($course->id, old('courses', $user->courses->pluck('id')->toArray())) ? 'selected' : '' }}>
+                                    {{ $course->name }} - {{ $course->description }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="form-text text-muted">Hold Ctrl (or Cmd on Mac) to select multiple courses</small>
+                        @error('courses')
+                            <div class="invalid-feedback">
+                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
                     <div class="d-flex gap-3">
                         <button type="submit" class="primary-btn">
-                            <i class="fas fa-check-circle"></i> Update Learner
+                            <i class="fas fa-check-circle"></i> Update Student
                         </button>
-                        <a href="{{ route('learners.index') }}" class="nav-btn">
+                        <a href="{{ route('users.index') }}" class="nav-btn">
                             <i class="fas fa-arrow-left"></i> Back to Directory
                         </a>
                     </div>

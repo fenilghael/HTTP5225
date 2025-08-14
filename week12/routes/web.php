@@ -6,9 +6,9 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfessorController;
 
 Route::get('/', function () {
-    return redirect()->route('learners.index');
+    return redirect()->route('users.index');
 });
 
-Route::resource('learners', UserController::class);
-Route::resource('programs', CourseController::class);
-Route::get('/faculty', [ProfessorController::class, 'index'])->name('faculty.index'); 
+Route::resource('users', UserController::class);
+Route::resource('courses', CourseController::class);
+Route::resource('professors', ProfessorController::class); 

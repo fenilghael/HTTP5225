@@ -8,12 +8,11 @@ use Illuminate\Support\Facades\Artisan;
 | Console Routes
 |--------------------------------------------------------------------------
 |
-| This file is where you may define all of your Closure based console
-| commands. Each Closure is bound to a command instance allowing a
-| simple approach to interacting with each command's IO methods.
+| Define all your Closure-based console commands in this file. Each Closure
+| is linked to a command instance, providing an easy way to work with
+| the command’s input and output methods.
 |
 */
-
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote'); 

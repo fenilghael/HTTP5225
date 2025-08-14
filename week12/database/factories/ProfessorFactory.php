@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class ProfessorFactory extends Factory
 {
     /**
-     * Define the model's default state.
+     * Specify the model’s default attribute values.
      *
      * @return array<string, mixed>
      */

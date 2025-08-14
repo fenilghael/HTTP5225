@@ -12,4 +12,12 @@ class Professor extends Model
     protected $fillable = [
         'name'
     ];
+
+    /**
+     * Get the course that this professor teaches.
+     */
+    public function course()
+    {
+        return $this->hasOne(Course::class);
+    }
 }

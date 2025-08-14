@@ -22,4 +22,12 @@ class User extends Model
     ];
 
     public $timestamps = false;
+
+    /**
+     * Get the courses that this user (student) is enrolled in.
+     */
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_user')->withTimestamps();
+    }
 } 

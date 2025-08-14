@@ -9,7 +9,7 @@ use App\Models\Professor;
 class ProfessorSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Execute the database seeders to populate data.
      */
     public function run(): void
     {
